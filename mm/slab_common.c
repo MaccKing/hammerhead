@@ -100,7 +100,6 @@ struct kmem_cache *kmem_cache_create(const char *name, size_t size, size_t align
 {
 	struct kmem_cache *s = NULL;
 	int err = 0;
-	char *n;
 
 	get_online_cpus();
 	mutex_lock(&slab_mutex);
@@ -109,26 +108,32 @@ struct kmem_cache *kmem_cache_create(const char *name, size_t size, size_t align
 		goto out_locked;
 
 
-	n = kstrdup(name, GFP_KERNEL);
-	if (!n) {
-		err = -ENOMEM;
+	s = __kmem_cache_alias(name, size, align, flags, ctor);
+	if (s)
 		goto out_locked;
-	}
-
-	s = __kmem_cache_create(n, size, align, flags, ctor);
 
 	if (s) {
-		/*
-		 * Check if the slab has actually been created and if it was a
-		 * real instatiation. Aliases do not belong on the list
-		 */
-		if (s->refcount == 1)
+		s->object_size = s->size = size;
+		s->align = align;
+		s->ctor = ctor;
+		s->name = kstrdup(name, GFP_KERNEL);
+		if (!s->name) {
+			kmem_cache_free(kmem_cache, s);
+			err = -ENOMEM;
+			goto out_locked;
+		}
+
+		err = __kmem_cache_create(s, flags);
+		if (!err)
+
 			list_add(&s->list, &slab_caches);
 
-	} else {
-		kfree(n);
-		err = -ENOSYS; /* Until __kmem_cache_create returns code */
-	}
+		else {
+			kfree(s->name);
+			kmem_cache_free(kmem_cache, s);
+		}
+	} else
+		err = -ENOMEM;
 
 out_locked:
 	mutex_unlock(&slab_mutex);
