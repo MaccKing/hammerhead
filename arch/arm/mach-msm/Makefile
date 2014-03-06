@@ -439,3 +439,4 @@ obj-y += fastchg.o
 obj-$(CONFIG_HAS_MACH_MEMUTILS) += memutils/
 obj-$(CONFIG_PERFMAP) += perfmap.o
 obj-$(CONFIG_MSM_SLEEPER) += msm-sleeper.o
+obj-$(CONFIG_TURBO_BOOST) += msm_turbo.o
