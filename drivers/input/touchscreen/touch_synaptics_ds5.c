@@ -50,6 +50,29 @@
 #include <linux/qpnp/power-on.h>
 #endif
 
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+static bool prevent_sleep_irq_wake_enabled = false;
+static void prevent_sleep_enable_irq_wake(unsigned int irq){
+	if(!prevent_sleep_irq_wake_enabled){
+		prevent_sleep_irq_wake_enabled = true;
+		enable_irq_wake(irq);
+		pr_info("irq_wake enabled\n");
+	}
+	else
+		pr_info("irq_wake already enabled\n");
+}
+static void prevent_sleep_disable_irq_wake(unsigned int irq){
+	if(prevent_sleep_irq_wake_enabled){
+		prevent_sleep_irq_wake_enabled = false;
+		disable_irq_wake(irq);
+		pr_info("irq_wake disabled\n");
+	}
+	else
+		pr_info("irq_wake already disabled\n");
+}
+#endif
+
 static struct workqueue_struct *synaptics_wq;
 
 /* RMI4 spec from 511-000405-01 Rev.D
@@ -1714,7 +1737,7 @@ static int lcd_notifier_callback(struct notifier_block *this,
 
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
 		if (prevent_sleep)
-			disable_irq_wake(ts->client->irq);
+			prevent_sleep_disable_irq_wake(ts->client->irq);
 #endif
 		break;
 	case LCD_EVENT_OFF_START:
@@ -1737,7 +1760,7 @@ static int lcd_notifier_callback(struct notifier_block *this,
 		}
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
 		if (prevent_sleep)
-			enable_irq_wake(ts->client->irq);
+			prevent_sleep_enable_irq_wake(ts->client->irq);
 #endif
 		break;
 	default:
