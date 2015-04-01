@@ -10,6 +10,6 @@ export SUB_ARCH=arm;
 export USER=`whoami`;
 export TMPFILE=`mktemp -t`;
 export KBUILD_BUILD_USER="TomorrowLandAce";
-export KBUILD_BUILD_HOST="PokeCenter";
+export KBUILD_BUILD_HOST="ChromaCenter";
 export CROSS_COMPILE=../toolchain/arm-eabi-4.9.3/bin/arm-eabi-;
 export NUMBEROFCPUS=`grep 'processor' /proc/cpuinfo | wc -l`;
