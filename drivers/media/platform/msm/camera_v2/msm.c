@@ -704,9 +704,6 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 		return -EIO;
 	}
 
-	/*re-init wait_complete */
-	INIT_COMPLETION(cmd_ack->wait_complete);
-
 	v4l2_event_queue(vdev, event);
 
 	if (timeout < 0) {
@@ -717,8 +714,13 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 	}
 
 	/* should wait on session based condition */
-	rc = wait_for_completion_timeout(&cmd_ack->wait_complete,
+	do {
+		rc = wait_event_interruptible_timeout(cmd_ack->wait,
+			!list_empty_careful(&cmd_ack->command_q.list),
 			msecs_to_jiffies(timeout));
+		if (rc != -ERESTARTSYS)
+			break;
+	} while (1);
 
 	if (list_empty_careful(&cmd_ack->command_q.list)) {
 		if (!rc) {
