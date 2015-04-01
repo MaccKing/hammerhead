@@ -517,6 +517,7 @@ static bool slab_max_order_set __initdata;
 
 static inline struct kmem_cache *page_get_cache(struct page *page)
 {
+	page = compound_head(page);
 	BUG_ON(!PageSlab(page));
 	return (struct kmem_cache *)page->lru.next;
 }
