@@ -36,6 +36,7 @@ extern struct kmem_cache *kmem_cache;
 struct kmem_cache *__kmem_cache_create(const char *name, size_t size,
 	size_t align, unsigned long flags, void (*ctor)(void *));
 
+<<<<<<< HEAD
 #ifdef CONFIG_SLUB
 struct kmem_cache *__kmem_cache_alias(const char *name, size_t size,
 	size_t align, unsigned long flags, void (*ctor)(void *));
@@ -45,6 +46,8 @@ static inline struct kmem_cache *__kmem_cache_alias(const char *name, size_t siz
 { return NULL; }
 #endif
 
+=======
+>>>>>>> parent of d36e5c8... mm/sl[aou]b: Move sysfs_slab_add to common
 int __kmem_cache_shutdown(struct kmem_cache *);
 
 #endif
