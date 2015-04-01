@@ -342,26 +342,17 @@ int msm_create_session(unsigned int session_id, struct video_device *vdev)
 {
 	struct msm_session *session = NULL;
 
-	if (!msm_session_q) {
-		pr_err("%s : session queue not available Line %d\n",
-				__func__, __LINE__);
+	if (!msm_session_q)
 		return -ENODEV;
-	}
 
 	session = msm_queue_find(msm_session_q, struct msm_session,
 		list, __msm_queue_find_session, &session_id);
-	if (session) {
-		pr_err("%s : Session not found Line %d\n",
-				__func__, __LINE__);
+	if (session)
 		return -EINVAL;
-	}
 
 	session = kzalloc(sizeof(*session), GFP_KERNEL);
-	if (!session) {
-		pr_err("%s : Memory not available Line %d\n",
-				__func__, __LINE__);
+	if (!session)
 		return -ENOMEM;
-	}
 
 	session->session_id = session_id;
 	session->event_q.vdev = vdev;
@@ -377,25 +368,17 @@ int msm_create_command_ack_q(unsigned int session_id, unsigned int stream_id)
 	struct msm_session *session;
 	struct msm_command_ack *cmd_ack;
 
-	if (!msm_session_q) {
-		pr_err("%s : Session queue not available Line %d\n",
-				__func__, __LINE__);
+	if (!msm_session_q)
 		return -ENODEV;
-	}
 
 	session = msm_queue_find(msm_session_q, struct msm_session,
 		list, __msm_queue_find_session, &session_id);
-	if (!session) {
-		pr_err("%s : Session not found Line %d\n",
-				__func__, __LINE__);
+	if (!session)
 		return -EINVAL;
-	}
 	mutex_lock(&session->lock);
 	cmd_ack = kzalloc(sizeof(*cmd_ack), GFP_KERNEL);
 	if (!cmd_ack) {
 		mutex_unlock(&session->lock);
-		pr_err("%s : memory not available Line %d\n",
-				__func__, __LINE__);
 		return -ENOMEM;
 	}
 
@@ -676,10 +659,7 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 	spin_lock_irqsave(&msm_eventq_lock, flags);
 	if (!msm_eventq) {
 		spin_unlock_irqrestore(&msm_eventq_lock, flags);
-
-		pr_err("%s : msm event queue not available Line %d\n",
-				__func__, __LINE__);
-		return -ENODEV;
+		return -EIO;
 	}
 	spin_unlock_irqrestore(&msm_eventq_lock, flags);
 
@@ -688,9 +668,11 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 	/* send to imaging server and wait for ACK */
 	session = msm_queue_find(msm_session_q, struct msm_session,
 		list, __msm_queue_find_session, &session_id);
-	if (WARN_ON(!session)) {
-		pr_err("%s : session not found Line %d\n",
-				__func__, __LINE__);
+	if (WARN_ON(!session))
+		return -EIO;
+
+	if (!atomic_read(&serv_running)) {
+		pr_info("%s: daemon hasn't subscribed yet!\n", __func__);
 		return -EIO;
 	}
 	mutex_lock(&session->lock);
@@ -699,8 +681,6 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 		__msm_queue_find_command_ack_q, &stream_id);
 	if (WARN_ON(!cmd_ack)) {
 		mutex_unlock(&session->lock);
-		pr_err("%s : cmd_ack not found Line %d\n",
-				__func__, __LINE__);
 		return -EIO;
 	}
 
@@ -708,8 +688,6 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 
 	if (timeout < 0) {
 		mutex_unlock(&session->lock);
-		pr_err("%s : timeout cannot be negative Line %d\n",
-				__func__, __LINE__);
 		return rc;
 	}
 
@@ -739,8 +717,6 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 		struct msm_command, list);
 	if (!cmd) {
 		mutex_unlock(&session->lock);
-		pr_err("%s : cmd dequeue failed Line %d\n",
-				__func__, __LINE__);
 		return -EINVAL;
 	}
 
@@ -748,15 +724,9 @@ int msm_post_event(struct v4l2_event *event, int timeout)
 
 	/* compare cmd_ret and event */
 	if (WARN_ON(event->type != cmd->event.type) ||
-			WARN_ON(event->id != cmd->event.id)) {
-		pr_err("%s : Either event type or id didnot match Line %d\n",
-				__func__, __LINE__);
-		pr_err("%s : event->type %d event->id %d\n", __func__,
-				event->type, event->id);
-		pr_err("%s : cmd->event.type %d cmd->event.id %d\n", __func__,
-				cmd->event.type, cmd->event.id);
+			WARN_ON(event->id != cmd->event.id))
 		rc = -EINVAL;
-	}
+
 	*event = cmd->event;
 
 	kzfree(cmd);
