@@ -1120,6 +1120,15 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 		return 0;
 #endif
 
+<<<<<<< HEAD
+#ifdef CONFIG_AIO_OPTIMIZATION
+	return blockdev_direct_IO(rw, iocb, inode, iter, offset,
+					get_data_block);
+#else
+	return blockdev_direct_IO(rw, iocb, inode, iov, offset, nr_segs,
+							get_data_block);
+#endif
+=======
 	trace_f2fs_direct_IO_enter(inode, offset, count, rw);
 
 	err = blockdev_direct_IO(rw, iocb, inode, iov, offset, nr_segs,
@@ -1130,6 +1139,7 @@ static ssize_t f2fs_direct_IO(int rw, struct kiocb *iocb,
 	trace_f2fs_direct_IO_exit(inode, offset, count, rw, err);
 
 	return err;
+>>>>>>> b7a7cff... F2FS backport test
 }
 
 static void f2fs_invalidate_data_page(struct page *page, unsigned long offset)
