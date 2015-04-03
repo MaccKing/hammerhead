@@ -21,6 +21,7 @@
 #include <linux/leds.h>
 #include <linux/pwm.h>
 #include <linux/err.h>
+
 #ifdef CONFIG_DEBUG_FS
 #include <linux/debugfs.h>
 #include <linux/ctype.h>
@@ -34,12 +35,12 @@
 #include <linux/input/doubletap2wake.h>
 #endif
 #endif
+
+#include <asm/system_info.h>
+
 #ifdef CONFIG_PWRKEY_SUSPEND
 #include <linux/qpnp/power-on.h>
 #endif
-#include "mdss_dsi.h"
-
-#include <asm/system_info.h>
 
 #include "mdss_dsi.h"
 
@@ -383,6 +384,7 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 
 	if (!gpio_get_value(ctrl->disp_en_gpio))
 		return 0;
+
 
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
 	if (prevent_sleep) {

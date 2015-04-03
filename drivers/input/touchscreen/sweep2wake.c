@@ -57,6 +57,7 @@ MODULE_LICENSE("GPLv2");
 /* Tuneables */
 #define S2W_DEBUG		0
 #define S2W_DEFAULT		0
+#define S2W_S2SONLY_DEFAULT	0
 #define S2W_PWRKEY_DUR          60
 
 #ifdef CONFIG_MACH_MSM8974_HAMMERHEAD
@@ -167,6 +168,8 @@ static void sweep2wake_pwrtrigger(void) {
 	if (pwrtrigger_time[0] - pwrtrigger_time[1] < TRIGGER_TIMEOUT)
 		return;
 
+	set_vibrate(vib_strength);
+
 	schedule_work(&sweep2wake_presspwr_work);
         return;
 }
@@ -213,7 +216,6 @@ static void detect_sweep2wake_v(int x, int y, bool st)
 						if (y < (nexty - S2W_Y_NEXT)) {
 							if (exec_county && (jiffies - firsty_time < SWEEP_TIMEOUT)) {
 								pr_info(LOGTAG"sweep up\n");
-								set_vibrate(vib_strength);
 								if (gestures_switch) {
 									report_gesture(3);
 								} else {
@@ -240,7 +242,6 @@ static void detect_sweep2wake_v(int x, int y, bool st)
 						if (y > (nexty + S2W_Y_NEXT)) {
 							if (exec_county && (jiffies - firsty_time < SWEEP_TIMEOUT)) {
 								pr_info(LOGTAG"sweep down\n");
-								set_vibrate(vib_strength);
 								if (gestures_switch) {
 									report_gesture(4);
 								} else {
@@ -292,7 +293,6 @@ static void detect_sweep2wake_h(int x, int y, bool st, bool wake)
 					if (x > (S2W_X_MAX - S2W_X_FINAL)) {
 						if (exec_countx && (jiffies - firstx_time < SWEEP_TIMEOUT)) {
 							pr_info(LOGTAG"sweep right\n");
-							set_vibrate(vib_strength);
 							if (gestures_switch && wake) {
 								report_gesture(1);
 							} else {
@@ -322,7 +322,6 @@ static void detect_sweep2wake_h(int x, int y, bool st, bool wake)
 					if (x < S2W_X_FINAL) {
 						if (exec_countx) {
 							pr_info(LOGTAG"sweep left\n");
-							set_vibrate(vib_strength);
 							if (gestures_switch && wake) {
 								report_gesture(2);
 							} else {
@@ -508,6 +507,7 @@ static ssize_t s2w_sweep2wake_dump(struct device *dev,
 static DEVICE_ATTR(sweep2wake, (S_IWUSR|S_IRUGO),
 	s2w_sweep2wake_show, s2w_sweep2wake_dump);
 
+
 static ssize_t sweep2sleep_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
@@ -662,13 +662,15 @@ static int __init sweep2wake_init(void)
 	if (rc) {
 		pr_warn("%s: sysfs_create_file failed for sweep2wake\n", __func__);
 	}
+
 	rc = sysfs_create_file(android_touch_kobj, &dev_attr_sweep2sleep.attr);
 	if (rc) {
 		pr_warn("%s: sysfs_create_file failed for sweep2sleep\n", __func__);
 	}
 	rc = sysfs_create_file(android_touch_kobj, &dev_attr_sweep2wake_version.attr);
+
 	if (rc) {
-		pr_warn("%s: sysfs_create_file failed for sweep2wake_version\n", __func__);
+		pr_warn("%s: sysfs_create_file failed for version\n", __func__);
 	}
 	rc = sysfs_create_file(android_touch_kobj, &dev_attr_wake_gestures.attr);
 	if (rc) {
