@@ -419,7 +419,7 @@ static ssize_t s2w_version_dump(struct device *dev,
 	return count;
 }
 
-static DEVICE_ATTR(version, (S_IWUSR|S_IRUGO),
+static DEVICE_ATTR(sweep2wake_version, (S_IWUSR|S_IRUGO),
 	s2w_version_show, s2w_version_dump);
 
 /*
