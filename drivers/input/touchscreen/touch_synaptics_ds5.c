@@ -38,33 +38,6 @@
 
 #include "SynaImage_ds5.h"
 
-#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE_QPNP_PON
-#include <linux/input/sweep2wake.h>
-#endif
-
-
-#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-static bool prevent_sleep_irq_wake_enabled = false;
-static void prevent_sleep_enable_irq_wake(unsigned int irq){
-	if(!prevent_sleep_irq_wake_enabled){
-		prevent_sleep_irq_wake_enabled = true;
-		enable_irq_wake(irq);
-		pr_info("irq_wake enabled\n");
-	}
-	else
-		pr_info("irq_wake already enabled\n");
-}
-static void prevent_sleep_disable_irq_wake(unsigned int irq){
-	if(prevent_sleep_irq_wake_enabled){
-		prevent_sleep_irq_wake_enabled = false;
-		disable_irq_wake(irq);
-		pr_info("irq_wake disabled\n");
-	}
-	else
-		pr_info("irq_wake already disabled\n");
-}
-#endif
-
 static struct workqueue_struct *synaptics_wq;
 
 /* RMI4 spec from 511-000405-01 Rev.D
@@ -266,28 +239,6 @@ static int synaptics_init_panel(struct i2c_client *client, struct synaptics_ts_f
 static int get_ic_info(struct synaptics_ts_data *ts, struct synaptics_ts_fw_info *fw_info);
 static void *get_touch_handle(struct i2c_client *client);
 
-#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
-/* gives back true if only one touch is recognized */
-bool is_single_touch(struct synaptics_ts_data *ts)
-{
-        int i = 0, cnt = 0;
-
-        for (i = 0; i<ts->pdata->max_id; i++) {
-                if ((!ts->ts_data.curr_data[i].state) ||
-                    (ts->ts_data.curr_data[i].state == ABS_RELEASE))
-                        continue;
-                else cnt++;
-		//save some cycles if we are already >1
-		if (cnt>1)
-			break;
-        }
-        if (cnt == 1)
-                return true;
-        else
-                return false;
-}
-#endif
-
 /* touch_asb_input_report
  *
  * finger status report
@@ -310,9 +261,6 @@ static void touch_abs_input_report(struct synaptics_ts_data *ts, const ktime_t t
 				ts->ts_data.curr_data[id].state != ABS_RELEASE);
 
 		if (ts->ts_data.curr_data[id].state != ABS_RELEASE) {
-#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
-			detect_sweep2wake(ts->ts_data.curr_data[id].x_position, ts->ts_data.curr_data[id].y_position, is_single_touch(ts));
-#endif
 			input_report_abs(ts->input_dev, ABS_MT_POSITION_X,
 					ts->ts_data.curr_data[id].x_position);
 			input_report_abs(ts->input_dev, ABS_MT_POSITION_Y,
