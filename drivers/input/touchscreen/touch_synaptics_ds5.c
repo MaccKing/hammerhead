@@ -1735,7 +1735,8 @@ static int lcd_notifier_callback(struct notifier_block *this,
 		}
 		mutex_unlock(&ts->input_dev->mutex);
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-		prevent_sleep_disable_irq_wake(ts->client->irq);
+		if (prevent_sleep)
+			prevent_sleep_disable_irq_wake(ts->client->irq);
 #endif
 		break;
 	case LCD_EVENT_OFF_START:
