@@ -509,7 +509,7 @@ static void touch_fw_upgrade_func(struct work_struct *work_fw_upgrade)
 		enable_irq(ts->client->irq);
 #ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
 		if (!irq_wake) {
-			irq_wake = true;
+			irq_wake = false;
 			enable_irq_wake(ts->client->irq);
 		}
 #endif
@@ -546,9 +546,9 @@ static void touch_init_func(struct work_struct *work_init)
 		enable_irq(ts->client->irq);
 		mutex_unlock(&ts->input_dev->mutex);
 #ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
-		if (!irq_wake) {
-			irq_wake = true;
-			enable_irq_wake(ts->client->irq);
+		if (irq_wake) {
+			irq_wake = false;
+			disable_irq_wake(ts->client->irq);
 		}
 #endif
 		return;
@@ -559,9 +559,9 @@ static void touch_init_func(struct work_struct *work_init)
 	enable_irq(ts->client->irq);
 
 #ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
-	if (!irq_wake) {
-		irq_wake = true;
-		enable_irq_wake(ts->client->irq);
+	if (irq_wake) {
+		irq_wake = false;
+		disable_irq_wake(ts->client->irq);
 	}
 #endif
 
@@ -591,7 +591,7 @@ static void touch_recover_func(struct work_struct *work_recover)
 	enable_irq(ts->client->irq);
 #ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
 	if (!irq_wake) {
-		irq_wake = true;
+		irq_wake = false;
 		enable_irq_wake(ts->client->irq);
 	}
 #endif
@@ -1520,7 +1520,7 @@ static ssize_t store_ts_reset(struct device *dev,
 	enable_irq(ts->client->irq);
 #ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
 	if (!irq_wake) {
-		irq_wake = true;
+		irq_wake = false;
 		enable_irq_wake(ts->client->irq);
 	}
 #endif
