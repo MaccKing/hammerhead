@@ -28,17 +28,7 @@
 #ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
 #include <linux/input/sweep2wake.h>
 #endif
-<<<<<<< HEAD
-#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
-#include <linux/input/doubletap2wake.h>
-#endif
-#endif
-#ifdef CONFIG_PWRKEY_SUSPEND
-#include <linux/qpnp/power-on.h>
-#endif
-=======
 
->>>>>>> parent of 24038dc... sweep2wake/doubletap2wake/touchscreen: Prepare for dt2w
 #include "mdss_dsi.h"
 
 #include <asm/system_info.h>
@@ -194,24 +184,6 @@ static void mdss_dsi_panel_bklt_dcs(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 void mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
-<<<<<<< HEAD
-#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
-	bool prevent_sleep = false;
-#endif
-#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE)
-	prevent_sleep = (s2w_switch > 0);
-#endif
-#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
-	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
-#endif
-#endif
-#ifdef CONFIG_PWRKEY_SUSPEND
-	if (pwrkey_pressed)
-		prevent_sleep = false;
-#endif
-=======
->>>>>>> parent of 24038dc... sweep2wake/doubletap2wake/touchscreen: Prepare for dt2w
 
 	if (pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
@@ -354,24 +326,6 @@ static int mdss_dsi_panel_off(struct mdss_panel_data *pdata)
 {
 	struct mipi_panel_info *mipi;
 	struct mdss_dsi_ctrl_pdata *ctrl = NULL;
-<<<<<<< HEAD
-#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
-	bool prevent_sleep = false;
-#endif
-#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE)
-	prevent_sleep = (s2w_switch > 0);
-#endif
-#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
-	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
-#endif
-#endif
-#ifdef CONFIG_PWRKEY_SUSPEND
-	if (pwrkey_pressed)
-		prevent_sleep = false;
-#endif
-=======
->>>>>>> parent of 24038dc... sweep2wake/doubletap2wake/touchscreen: Prepare for dt2w
 
 	if (pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
