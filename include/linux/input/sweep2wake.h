@@ -33,9 +33,6 @@ extern bool scr_on_touch;
 extern bool exec_count;
 extern bool barrier[2];
 
-/* Sweep2wake reset function */
-extern void sweep2wake_reset(void);
-
 /* Sweep2wake main function */
 extern void detect_sweep2wake(int, int, bool);
 
